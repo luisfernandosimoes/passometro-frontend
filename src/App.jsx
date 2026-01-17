@@ -65,30 +65,6 @@ export default function App() {
     );
   }
 
-  function limparTextoPaciente(id) {
-    setPacientes((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? {
-              ...p,
-              evolucaoAnterior: "",
-              controles: "",
-              laboratorio: "",
-              gasometria: "",
-              status: "idle",
-              dados: null,
-            }
-          : p
-      )
-    );
-  }
-
-  function excluirPaciente(id) {
-    setPacientes((prev) =>
-      prev.filter((p) => p.id !== id)
-    );
-  }
-
   async function processarPaciente(paciente) {
     try {
       setPacientes((prev) =>
@@ -100,7 +76,7 @@ export default function App() {
       );
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/gerar-passometro`,
+        "https://passometro-backend-1.onrender.com/api/gerar-passometro",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -123,6 +99,7 @@ export default function App() {
         )
       );
     } catch (e) {
+      console.error(e);
       setPacientes((prev) =>
         prev.map((p) =>
           p.id === paciente.id
@@ -206,19 +183,9 @@ export default function App() {
             }
           />
 
-          <div style={{ display: "flex", gap: "8px", marginTop: 8 }}>
-            <button onClick={() => processarPaciente(p)}>
-              Inserir dados
-            </button>
-
-            <button onClick={() => limparTextoPaciente(p.id)}>
-              🧹 Limpar texto
-            </button>
-
-            <button onClick={() => excluirPaciente(p.id)}>
-              ❌ Excluir
-            </button>
-          </div>
+          <button onClick={() => processarPaciente(p)}>
+            Inserir dados
+          </button>
 
           <span className="status">
             {p.status === "processing" && " ⏳ Processando"}
