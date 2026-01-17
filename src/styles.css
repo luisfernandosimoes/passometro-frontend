@@ -1,0 +1,235 @@
+* {
+  box-sizing: border-box;
+}
+
+/* =========================
+   BASE GLOBAL
+========================= */
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+    "Helvetica Neue", sans-serif;
+  background-color: #f5f6f7;
+  color: #1f2937;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+
+.container {
+  max-width: 960px;
+  margin: 24px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* =========================
+   TÍTULOS
+========================= */
+
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+  color: #111827;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+/* =========================
+   BOTÕES
+========================= */
+
+button {
+  background-color: #e5e7eb;
+  color: #111827;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #d1d5db;
+}
+
+/* =========================
+   TEXTAREA
+========================= */
+
+textarea {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  padding: 10px;
+  font-size: 1rem;
+  resize: none;
+  line-height: 1.55;
+  background-color: #ffffff;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+/* =========================
+   CARD DO PACIENTE
+========================= */
+
+.card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 22px;
+  margin-top: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border-left: 4px solid #d1d5db;
+}
+
+/* =========================
+   IDENTIFICAÇÃO
+========================= */
+
+.paciente-header {
+  margin-bottom: 24px;
+  font-size: 1.05rem;
+  color: #111827;
+}
+
+/* =========================
+   CAMPOS (BASE)
+========================= */
+
+.campo {
+  background-color: #f0f2f4;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 18px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.campo > div {
+  text-align: justify;
+  color: #1f2937;
+}
+
+/* =========================
+   CAMPOS POR TIPO
+========================= */
+
+.campo-problemas { background-color: #eef0f2; }
+.campo-hda { background-color: #eceff1; }
+.campo-evolucao { background-color: #edf1f3; }
+.campo-controles { background-color: #e9f0f7; }
+.campo-laboratorio { background-color: #edf4ef; }
+.campo-gasometria { background-color: #e7f2f1; }
+.campo-medicacoes { background-color: #f0edf5; }
+.campo-condutas { background-color: #eef3ee; }
+.campo-intercorrencias { background-color: #f2eeee; }
+
+/* =========================
+   CAMPOS EDITÁVEIS
+========================= */
+
+.campo-editavel {
+  border: 1px dashed #c7cdd3;
+}
+
+/* =========================
+   LISTAS
+========================= */
+
+ul {
+  list-style-position: inside;
+  margin: 10px 0 0 0;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+/* =========================
+   LINHAS MARCADAS
+========================= */
+
+.linha-marcada {
+  position: relative;
+  padding-left: 10px;
+}
+
+.linha-marcada::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #6b7280;
+}
+
+/* =========================
+   ETAPA D — DESTAQUES CLÍNICOS (VIBRANTES)
+========================= */
+
+.alerta {
+  color: #ff1a1a;       /* 🔴 vermelho vivo, alto impacto */
+  font-weight: 700;
+}
+
+.atencao {
+  color: #9d00ff;       /* 🟣 roxo vibrante / quase fluorescente */
+  font-weight: 600;
+}
+
+/* =========================
+   STATUS / ESTADO VAZIO
+========================= */
+
+.status {
+  margin-left: 12px;
+  font-size: 0.85rem;
+}
+
+.empty-state {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 28px;
+  text-align: center;
+  color: #4b5563;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+  .container {
+    margin: 12px;
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 1.55rem;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  textarea {
+    font-size: 0.95rem;
+  }
+
+  .campo {
+    font-size: 0.95rem;
+    padding: 14px;
+  }
+
+  .paciente-header {
+    font-size: 1rem;
+  }
+}
