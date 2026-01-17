@@ -6,7 +6,7 @@ export default function App() {
   const isPassometro = params.get("passometro") === "1";
 
   /* =====================================================
-     TELA DO PASSÔMETRO (INALTERADA)
+     TELA DO PASSÔMETRO (CHECKPOINT 14 — INALTERADA)
   ===================================================== */
 
   if (isPassometro) {
@@ -22,7 +22,7 @@ export default function App() {
   }
 
   /* =====================================================
-     TELA DE INSERÇÃO — ESTADO PERSISTENTE
+     TELA DE INSERÇÃO — ESTADO LOCAL (CHECKPOINT 14)
   ===================================================== */
 
   const [pacientes, setPacientes] = useState(() => {
@@ -39,7 +39,7 @@ export default function App() {
   }, [pacientes]);
 
   /* =====================================================
-     FUNÇÕES
+     FUNÇÕES EXISTENTES
   ===================================================== */
 
   function adicionarPaciente() {
@@ -65,57 +65,77 @@ export default function App() {
     );
   }
 
+  /* =====================================================
+     🆕 NOVAS FUNÇÕES (SEGURAS)
+  ===================================================== */
+
+  function limparPaciente(id) {
+    if (!window.confirm("Limpar todos os textos deste paciente?")) return;
+
+    setPacientes((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              evolucaoAnterior: "",
+              controles: "",
+              laboratorio: "",
+              gasometria: "",
+              status: "idle",
+              dados: null,
+            }
+          : p
+      )
+    );
+  }
+
+  function excluirPaciente(id) {
+    if (!window.confirm("Excluir este paciente?")) return;
+    setPacientes((prev) => prev.filter((p) => p.id !== id));
+  }
+
   async function processarPaciente(paciente) {
-    try {
-      setPacientes((prev) =>
-        prev.map((p) =>
-          p.id === paciente.id
-            ? { ...p, status: "processing" }
-            : p
-        )
-      );
+    setPacientes((prev) =>
+      prev.map((p) =>
+        p.id === paciente.id
+          ? { ...p, status: "processing" }
+          : p
+      )
+    );
 
-      const response = await fetch(
-        "https://passometro-backend-1.onrender.com/api/gerar-passometro",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            evolucaoAnterior: paciente.evolucaoAnterior,
-            controles: paciente.controles,
-            laboratorio: paciente.laboratorio,
-            gasometria: paciente.gasometria,
-          }),
-        }
-      );
+    const r = await fetch(
+      "https://passometro-backend-1.onrender.com/api/gerar-passometro",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          evolucaoAnterior: paciente.evolucaoAnterior,
+          controles: paciente.controles,
+          laboratorio: paciente.laboratorio,
+          gasometria: paciente.gasometria,
+        }),
+      }
+    );
 
-      const data = await response.json();
+    const data = await r.json();
 
-      setPacientes((prev) =>
-        prev.map((p) =>
-          p.id === paciente.id
-            ? { ...p, status: "done", dados: data }
-            : p
-        )
-      );
-    } catch (e) {
-      console.error(e);
-      setPacientes((prev) =>
-        prev.map((p) =>
-          p.id === paciente.id
-            ? { ...p, status: "error" }
-            : p
-        )
-      );
-    }
+    setPacientes((prev) =>
+      prev.map((p) =>
+        p.id === paciente.id
+          ? { ...p, status: "done", dados: data }
+          : p
+      )
+    );
   }
 
   function gerarPassometro() {
     const prontos = pacientes.filter((p) => p.status === "done");
+
     localStorage.setItem(
       "pacientes-passometro",
       JSON.stringify(prontos)
     );
+
     window.open("?passometro=1", "_blank");
   }
 
@@ -139,11 +159,7 @@ export default function App() {
             placeholder="Evolução anterior"
             value={p.evolucaoAnterior}
             onChange={(e) =>
-              atualizarCampo(
-                p.id,
-                "evolucaoAnterior",
-                e.target.value
-              )
+              atualizarCampo(p.id, "evolucaoAnterior", e.target.value)
             }
           />
 
@@ -151,11 +167,7 @@ export default function App() {
             placeholder="Últimos controles"
             value={p.controles}
             onChange={(e) =>
-              atualizarCampo(
-                p.id,
-                "controles",
-                e.target.value
-              )
+              atualizarCampo(p.id, "controles", e.target.value)
             }
           />
 
@@ -163,11 +175,7 @@ export default function App() {
             placeholder="Último laboratório"
             value={p.laboratorio}
             onChange={(e) =>
-              atualizarCampo(
-                p.id,
-                "laboratorio",
-                e.target.value
-              )
+              atualizarCampo(p.id, "laboratorio", e.target.value)
             }
           />
 
@@ -175,22 +183,28 @@ export default function App() {
             placeholder="Última gasometria"
             value={p.gasometria}
             onChange={(e) =>
-              atualizarCampo(
-                p.id,
-                "gasometria",
-                e.target.value
-              )
+              atualizarCampo(p.id, "gasometria", e.target.value)
             }
           />
 
-          <button onClick={() => processarPaciente(p)}>
-            Inserir dados
-          </button>
+          {/* 🔘 BOTÕES */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button onClick={() => processarPaciente(p)}>
+              Inserir dados
+            </button>
+
+            <button onClick={() => limparPaciente(p.id)}>
+              🧹 Limpar textos
+            </button>
+
+            <button onClick={() => excluirPaciente(p.id)}>
+              🗑 Excluir paciente
+            </button>
+          </div>
 
           <span className="status">
             {p.status === "processing" && " ⏳ Processando"}
             {p.status === "done" && " ✅ Concluído"}
-            {p.status === "error" && " ❌ Erro"}
           </span>
         </div>
       ))}
