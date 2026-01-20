@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PassometroScreen from "./screens/PassometroScreen";
 
 /* 🔧 BACKEND LOCAL */
-const BACKEND_URL = "http://localhost:3001";
+const BACKEND_URL = "https://passometro-backend-1.onrender.com";
 
 export default function App() {
   const params = new URLSearchParams(window.location.search);
