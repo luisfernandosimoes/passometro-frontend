@@ -1,15 +1,39 @@
 import { useEffect, useRef, useState } from "react";
 
+const BACKEND_URL = "https://passometro-backend-1.onrender.com";
+
 export default function PassometroScreen({ pacientes }) {
   const [dados, setDados] = useState(pacientes || []);
   const [editando, setEditando] = useState({});
 
-  useEffect(() => {
-    localStorage.setItem(
-      "pacientes-passometro",
-      JSON.stringify(dados)
-    );
-  }, [dados]);
+// ===============================
+// CARREGAR PASSÔMETRO DO BACKEND
+// ===============================
+useEffect(() => {
+  fetch(`${BACKEND_URL}/api/passometro`)
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        setDados(data);
+      }
+    })
+    .catch(() => {
+      console.warn("Backend indisponível, usando estado local");
+    });
+}, []);
+
+// ===============================
+// SALVAR PASSÔMETRO NO BACKEND
+// ===============================
+useEffect(() => {
+  fetch(`${BACKEND_URL}/api/passometro`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pacientes: dados }),
+  }).catch(() => {
+    console.warn("Erro ao salvar passômetro no backend");
+  });
+}, [dados]);
 
   function iniciarEdicao(id, campo) {
     setEditando({ id, campo });
