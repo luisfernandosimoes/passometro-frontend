@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import PassometroScreen from "./screens/PassometroScreen";
 
+/* 🔧 BACKEND LOCAL */
+const BACKEND_URL = "http://localhost:3001";
+
 export default function App() {
   const params = new URLSearchParams(window.location.search);
   const isPassometro = params.get("passometro") === "1";
 
   /* =====================================================
-     TELA DO PASSÔMETRO (CHECKPOINT 14 — INALTERADA)
+     TELA DO PASSÔMETRO — USO LOCAL
   ===================================================== */
 
   if (isPassometro) {
@@ -22,7 +25,7 @@ export default function App() {
   }
 
   /* =====================================================
-     TELA DE INSERÇÃO — ESTADO LOCAL (CHECKPOINT 14)
+     TELA DE INSERÇÃO — ESTADO LOCAL
   ===================================================== */
 
   const [pacientes, setPacientes] = useState(() => {
@@ -30,7 +33,6 @@ export default function App() {
     return salvo ? JSON.parse(salvo) : [];
   });
 
-  /* 🔒 SALVAMENTO AUTOMÁTICO */
   useEffect(() => {
     localStorage.setItem(
       "pacientes-insercao",
@@ -39,7 +41,7 @@ export default function App() {
   }, [pacientes]);
 
   /* =====================================================
-     FUNÇÕES EXISTENTES
+     FUNÇÕES
   ===================================================== */
 
   function adicionarPaciente() {
@@ -47,6 +49,7 @@ export default function App() {
       ...prev,
       {
         id: Date.now(),
+        leito: "",
         evolucaoAnterior: "",
         controles: "",
         laboratorio: "",
@@ -65,10 +68,6 @@ export default function App() {
     );
   }
 
-  /* =====================================================
-     🆕 NOVAS FUNÇÕES (SEGURAS)
-  ===================================================== */
-
   function limparPaciente(id) {
     if (!window.confirm("Limpar todos os textos deste paciente?")) return;
 
@@ -77,6 +76,7 @@ export default function App() {
         p.id === id
           ? {
               ...p,
+              leito: "",
               evolucaoAnterior: "",
               controles: "",
               laboratorio: "",
@@ -103,22 +103,21 @@ export default function App() {
       )
     );
 
-    const r = await fetch(
-      "https://passometro-backend-1.onrender.com/api/gerar-passometro",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          evolucaoAnterior: paciente.evolucaoAnterior,
-          controles: paciente.controles,
-          laboratorio: paciente.laboratorio,
-          gasometria: paciente.gasometria,
-        }),
-      }
-    );
+    const r = await fetch(`${BACKEND_URL}/api/gerar-passometro`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        leitoInsercao: paciente.leito,
+        evolucaoAnterior: paciente.evolucaoAnterior,
+        controles: paciente.controles,
+        laboratorio: paciente.laboratorio,
+        gasometria: paciente.gasometria,
+      }),
+    });
 
     const data = await r.json();
 
+    // 🔹 AQUI NÃO MEXEMOS: backend continua soberano
     setPacientes((prev) =>
       prev.map((p) =>
         p.id === paciente.id
@@ -129,7 +128,25 @@ export default function App() {
   }
 
   function gerarPassometro() {
-    const prontos = pacientes.filter((p) => p.status === "done");
+    const prontos = pacientes
+      .filter((p) => p.status === "done")
+      .map((p) => {
+        // 🔴 CORREÇÃO CRÍTICA: persistir leito junto aos dados
+        const dados = p.dados || {};
+        const identificacao = dados.identificacao || {};
+
+        return {
+          id: p.id,
+          leito: p.leito,
+          dados: {
+            ...dados,
+            identificacao: {
+              ...identificacao,
+              leito: p.leito,
+            },
+          },
+        };
+      });
 
     localStorage.setItem(
       "pacientes-passometro",
@@ -145,15 +162,40 @@ export default function App() {
 
   return (
     <div className="container">
-      <h1>Passômetro UTI</h1>
+      <h1>Passômetro UTI — LOCAL</h1>
 
       <button onClick={adicionarPaciente}>
         ➕ Adicionar paciente
       </button>
 
-      {pacientes.map((p, i) => (
+      {pacientes.map((p) => (
         <div className="card" key={p.id}>
-          <h3>Paciente {i + 1}</h3>
+          {/* 🔹 LEITO — TAMANHO IGUAL AO ANTIGO “PACIENTE 1” */}
+          <div
+            style={{
+              marginBottom: 12,
+              fontSize: "1.25rem",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <span>Leito</span>
+            <input
+              value={p.leito}
+              onChange={(e) =>
+                atualizarCampo(p.id, "leito", e.target.value)
+              }
+              style={{
+                width: "4ch",
+                fontSize: "inherit",
+                fontWeight: "inherit",
+                lineHeight: "1.2",
+                padding: "2px 4px",
+              }}
+            />
+          </div>
 
           <textarea
             placeholder="Evolução anterior"
@@ -187,7 +229,6 @@ export default function App() {
             }
           />
 
-          {/* 🔘 BOTÕES */}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button onClick={() => processarPaciente(p)}>
               Inserir dados
